@@ -1,0 +1,2043 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="装修需求收集工具 - 帮助您整理装修前的各项需求">
+  <meta name="theme-color" content="#4F6EFF">
+  <title>装修需求收集表</title>
+  <style>
+    /* ===== 全局样式 ===== */
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #F5F5F5;
+      color: #333;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    /* ===== 页面容器 ===== */
+    .page { min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* ===== 进度条 ===== */
+    .progress-bar {
+      height: 3px;
+      background: #E8E8E8;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .progress-inner {
+      height: 100%;
+      background: linear-gradient(90deg, #4F6EFF, #7B9AFF);
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+
+    /* ===== Tab导航 ===== */
+    .tab-nav {
+      background: #FFFFFF;
+      position: sticky;
+      top: 3px;
+      z-index: 99;
+      border-bottom: 1px solid #EEEEEE;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .tab-nav::-webkit-scrollbar { display: none; }
+    .tab-list {
+      display: flex;
+      padding: 0 12px;
+      min-width: max-content;
+    }
+    .tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 14px 20px;
+      min-width: 70px;
+      opacity: 0.5;
+      transition: opacity 0.2s, color 0.2s;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+    .tab-item.active {
+      opacity: 1;
+      border-bottom-color: #4F6EFF;
+    }
+    .tab-icon { font-size: 20px; line-height: 1; margin-bottom: 4px; }
+    .tab-name { font-size: 12px; color: #333; font-weight: 500; white-space: nowrap; }
+    .tab-item.active .tab-name { color: #4F6EFF; }
+
+    /* ===== 表单区域 ===== */
+    .form-area {
+      flex: 1;
+      padding: 16px 16px 120px;
+      max-width: 480px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* ===== Tab内容切换 ===== */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ===== 区块标题 ===== */
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin: 20px 0 12px;
+      padding-left: 10px;
+      border-left: 3px solid #4F6EFF;
+    }
+    .section-title:first-child { margin-top: 0; }
+    .space-hint {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 12px;
+      padding: 0 4px;
+    }
+
+    /* ===== 卡片 ===== */
+    .card {
+      background: #FFFFFF;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      overflow: hidden;
+    }
+
+    /* ===== 空间区块 ===== */
+    .space-block { margin-bottom: 16px; }
+    .space-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 0 4px;
+    }
+    .space-icon { font-size: 16px; margin-right: 8px; }
+    .space-name { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+
+    /* ===== 表单项 ===== */
+    .form-item {
+      padding: 16px 18px;
+      border-bottom: 1px solid #F0F0F0;
+    }
+    .form-item:last-child { border-bottom: none; }
+
+    .form-label {
+      font-size: 13px;
+      color: #333;
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+
+    /* 标签 */
+    .label-dot {
+      display: inline-block;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      background: #F0F0F0;
+      color: #888;
+      margin-right: 6px;
+      font-weight: 400;
+      vertical-align: middle;
+    }
+    .label-dot.red { background: #FFEBEB; color: #FF4D4F; }
+
+    /* 输入框行 */
+    .input-row { display: flex; align-items: center; }
+    .form-input {
+      flex: 1;
+      font-size: 14px;
+      color: #1a1a1a;
+      padding: 10px 0;
+      border: none;
+      border-bottom: 1.5px solid #E8E8E8;
+      background: transparent;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus { border-bottom-color: #4F6EFF; }
+    .form-input::placeholder { color: #CCCCCC; }
+    .input-unit { font-size: 13px; color: #888; padding-left: 10px; flex-shrink: 0; }
+
+    /* 文本域 */
+    .form-textarea {
+      width: 100%;
+      font-size: 14px;
+      color: #1a1a1a;
+      background: #F8F8F8;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 14px;
+      min-height: 100px;
+      resize: none;
+      outline: none;
+      line-height: 1.6;
+      font-family: inherit;
+    }
+    .form-textarea:focus { background: #F0F0F0; }
+
+    /* ===== 下拉选择行 ===== */
+    .select-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1.5px solid #E8E8E8;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .select-row:active { border-bottom-color: #4F6EFF; }
+    .select-placeholder { font-size: 14px; color: #CCCCCC; }
+    .select-value { font-size: 14px; color: #1a1a1a; flex: 1; }
+    .select-arrow { font-size: 18px; color: #CCCCCC; margin-left: 10px; transition: transform 0.2s; }
+    .select-row.selected .select-arrow { color: #4F6EFF; transform: rotate(90deg); }
+
+    /* ===== 多选标签 ===== */
+    .multi-select-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .multi-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 7px 12px;
+      background: #F5F5F5;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #666;
+      border: 1.5px solid #E8E8E8;
+      transition: all 0.15s;
+      cursor: pointer;
+      user-select: none;
+    }
+    .multi-tag.selected {
+      background: #EEF2FF;
+      border-color: #4F6EFF;
+      color: #4F6EFF;
+      font-weight: 500;
+    }
+
+    /* ===== 提交区 ===== */
+    .submit-section {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 16px;
+      background: linear-gradient(to top, #F5F5F5 80%, transparent);
+      z-index: 50;
+    }
+    .btn-preview {
+      width: 100%;
+      height: 48px;
+      background: linear-gradient(135deg, #4F6EFF, #6B82FF);
+      color: #FFFFFF;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 24px;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(79, 110, 255, 0.3);
+      transition: transform 0.2s, opacity 0.2s;
+    }
+    .btn-preview:active { transform: scale(0.98); }
+    .btn-preview:disabled { opacity: 0.7; cursor: not-allowed; }
+    .submit-hint {
+      text-align: center;
+      font-size: 11px;
+      color: #AAAAAA;
+      margin-top: 10px;
+    }
+
+    /* ===== 下拉选择弹窗 ===== */
+    .select-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .select-modal.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .select-panel {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #FFFFFF;
+      border-radius: 20px 20px 0 0;
+      max-height: 70vh;
+      display: flex;
+      flex-direction: column;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .select-modal.show .select-panel { transform: translateY(0); }
+    .select-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 20px 14px;
+      border-bottom: 1px solid #F0F0F0;
+    }
+    .select-panel-title { font-size: 16px; font-weight: 600; color: #1a1a1a; }
+    .select-panel-close {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #999;
+      background: #F5F5F5;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .select-options-list {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .select-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid #F8F8F8;
+      font-size: 14px;
+      color: #333;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .select-option:active { background: #F5F7FF; }
+    .select-option.selected { color: #4F6EFF; font-weight: 600; }
+    .check-icon { color: #4F6EFF; font-size: 16px; }
+    .select-panel-footer {
+      padding: 14px 20px 34px;
+    }
+    .btn-confirm-select {
+      width: 100%;
+      height: 44px;
+      background: #4F6EFF;
+      color: #FFFFFF;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 22px;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-confirm-select:active { opacity: 0.9; }
+
+    /* ===== 隐藏的Canvas ===== */
+    .pdf-canvas-container {
+      position: fixed;
+      left: -9999px;
+      top: -9999px;
+      width: 375px;
+      height: 812px;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    /* ===== 预览页面 ===== */
+    .preview-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.9);
+      z-index: 300;
+      display: none;
+      flex-direction: column;
+    }
+    .preview-overlay.show { display: flex; }
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      color: #FFF;
+    }
+    .preview-title { font-size: 16px; font-weight: 600; }
+    .preview-close { font-size: 24px; cursor: pointer; opacity: 0.7; }
+    .preview-close:hover { opacity: 1; }
+    .preview-content {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .preview-image {
+      width: 100%;
+      max-width: 375px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .preview-footer {
+      padding: 16px 20px 34px;
+      display: flex;
+      gap: 12px;
+    }
+    .btn-share, .btn-save {
+      flex: 1;
+      height: 48px;
+      border-radius: 24px;
+      border: none;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-share { background: #4F6EFF; color: #FFF; }
+    .btn-save { background: #FFF; color: #333; }
+    .btn-share:active, .btn-save:active { opacity: 0.9; }
+
+    /* ===== Toast提示 ===== */
+    .toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.8);
+      color: #FFF;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      z-index: 500;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+
+    /* ===== 加载动画 ===== */
+    .loading-mask {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255,255,255,0.9);
+      z-index: 400;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+    .loading-mask.show { display: flex; }
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #E8E8E8;
+      border-top-color: #4F6EFF;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 14px; color: #666; }
+
+    /* ===== 重置按钮 ===== */
+    .reset-btn {
+      position: fixed;
+      bottom: 80px;
+      right: 16px;
+      z-index: 101;
+      padding: 6px 12px;
+      background: #FFFFFF;
+      border: 1px solid #E8E8E8;
+      border-radius: 16px;
+      font-size: 12px;
+      color: #666;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      transition: all 0.2s;
+    }
+    .reset-btn:active {
+      background: #F5F5F5;
+      transform: scale(0.96);
+    }
+    .reset-btn svg { width: 14px; height: 14px; }
+
+    /* ===== 确认弹窗 ===== */
+    .confirm-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 600;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .confirm-overlay.show { display: flex; }
+    .confirm-box {
+      background: #FFF;
+      border-radius: 16px;
+      padding: 24px;
+      width: 280px;
+      text-align: center;
+    }
+    .confirm-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+    .confirm-desc {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .confirm-btns {
+      display: flex;
+      gap: 12px;
+    }
+    .confirm-btn {
+      flex: 1;
+      height: 40px;
+      border-radius: 20px;
+      border: none;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .confirm-btn.cancel {
+      background: #F5F5F5;
+      color: #666;
+    }
+    .confirm-btn.ok {
+      background: #FF4D4F;
+      color: #FFF;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- 进度条 -->
+    <div class="progress-bar">
+      <div class="progress-inner" id="progressBar"></div>
+    </div>
+
+    <!-- Tab导航 -->
+    <div class="tab-nav">
+      <div class="tab-list">
+        <div class="tab-item active" data-tab="1">
+          <span class="tab-icon">🏠</span>
+          <span class="tab-name">基础</span>
+        </div>
+        <div class="tab-item" data-tab="2">
+          <span class="tab-icon">💰</span>
+          <span class="tab-name">成员+预算</span>
+        </div>
+        <div class="tab-item" data-tab="3">
+          <span class="tab-icon">🕹</span>
+          <span class="tab-name">设备</span>
+        </div>
+        <div class="tab-item" data-tab="4">
+          <span class="tab-icon">🚪</span>
+          <span class="tab-name">空间</span>
+        </div>
+        <div class="tab-item" data-tab="5">
+          <span class="tab-icon">✨</span>
+          <span class="tab-name">偏好</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 重置按钮 -->
+    <button class="reset-btn" id="resetBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+        <path d="M3 3v5h5"/>
+      </svg>
+      重置
+    </button>
+
+    <!-- 确认弹窗 -->
+    <div class="confirm-overlay" id="confirmOverlay">
+      <div class="confirm-box">
+        <div class="confirm-title">确认重置？</div>
+        <div class="confirm-desc">所有已填写的内容将被清空<br>此操作不可恢复</div>
+        <div class="confirm-btns">
+          <button class="confirm-btn cancel" id="confirmCancel">取消</button>
+          <button class="confirm-btn ok" id="confirmOk">确认重置</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 表单区域 -->
+    <div class="form-area">
+      <!-- Tab1: 基础信息 -->
+      <div class="tab-content active" data-content="1">
+        <div class="section-title">房屋基础信息</div>
+        <div class="card">
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot">必填</span>所在城市</div>
+            <div class="input-row">
+              <input class="form-input" id="city" placeholder="请输入城市名称，如：上海" data-field="city">
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot red">必填</span>房屋状态</div>
+            <div class="select-row" data-field="houseStatus">
+              <span class="select-placeholder">请选择房屋状态</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot red">必填</span>房屋面积（㎡）</div>
+            <div class="input-row">
+              <input class="form-input" type="number" id="houseArea" placeholder="如：120" data-field="houseArea">
+              <span class="input-unit">㎡</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot">必填</span>物业类型及层数</div>
+            <div class="select-row" data-field="propertyType">
+              <span class="select-placeholder">请选择物业类型</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot">必填</span>计划入住时间</div>
+            <div class="select-row" data-field="moveInDate">
+              <span class="select-placeholder">请选择入住时间</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot">必填</span>可量房时间</div>
+            <div class="select-row" data-field="measureDate">
+              <span class="select-placeholder">请选择时间</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab2: 成员+预算 -->
+      <div class="tab-content" data-content="2">
+        <div class="section-title">居住成员信息</div>
+        <div class="card">
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot red">必填</span>居住成员概况</div>
+            <div class="input-row">
+              <input class="form-input" id="residentDesc" placeholder="如：2大1小，老人偶尔来住" data-field="residentDesc">
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot">选填</span>是否有老人同住</div>
+            <div class="select-row" data-field="elderly">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot">选填</span>是否有儿童</div>
+            <div class="select-row" data-field="children">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot">选填</span>是否养宠物</div>
+            <div class="select-row" data-field="pet">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot">选填</span>在家办公频率</div>
+            <div class="select-row" data-field="workMode">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title">装修预算<span style="font-size:12px;color:#999;">（导出时不显示，仅业主可见）</span></div>
+        <div class="card">
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot red">必填</span>装修总预算</div>
+            <div class="select-row" data-field="totalBudget">
+              <span class="select-placeholder">请选择预算区间</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot">选填</span>硬装预算占比</div>
+            <div class="select-row" data-field="hardBudget">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot">选填</span>装修品质定位</div>
+            <div class="select-row" data-field="quality">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title">提前确认项（可先填"待确认"）</div>
+        <div class="card">
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot">必填</span>入户门外开/内开</div>
+            <div class="select-row" data-field="doorDirection">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot">必填</span>卫生间类型</div>
+            <div class="select-row" data-field="sunkenBathroom">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot">必填</span>阳台/入户花园</div>
+            <div class="select-row" data-field="balconySealed">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot">必填</span>飘窗能否拆除</div>
+            <div class="select-row" data-field="bayWindowRemove">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot">选填</span>走廊能否放鞋柜</div>
+            <div class="select-row" data-field="shoeCabinetOutside">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot">选填</span>空调机位能否包进室内</div>
+            <div class="select-row" data-field="acUnitIndoor">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab3: 设备 -->
+      <div class="tab-content" data-content="3">
+        <div class="section-title">家电设备规划</div>
+        <div class="card">
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot">选填</span>客厅空调类型</div>
+            <div class="select-row" data-field="acType">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot">选填</span>卧室空调类型</div>
+            <div class="select-row" data-field="acTypeRoom">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot">选填</span>热水器类型</div>
+            <div class="select-row" data-field="waterHeater">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot">选填</span>地暖/采暖</div>
+            <div class="select-row" data-field="floorHeating">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot">选填</span>电动窗帘</div>
+            <div class="select-row" data-field="smartCurtain">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot">选填</span>扫拖机器人</div>
+            <div class="select-row" data-field="robotCleaner">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot">选填</span>厨房油烟机类型</div>
+            <div class="select-row" data-field="hoodType">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot">选填</span>净水设备</div>
+            <div class="select-row" data-field="waterPurifier">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab4: 空间 -->
+      <div class="tab-content" data-content="4">
+        <div class="space-hint">以下为各空间家具和功能选项，支持多选</div>
+
+        <!-- 玄关 -->
+        <div class="space-block">
+          <div class="space-header">
+            <span class="space-icon">🚪</span>
+            <span class="space-name">玄关</span>
+          </div>
+          <div class="card">
+            <div class="form-item">
+              <div class="form-label">核心功能（可多选）</div>
+              <div class="multi-select-grid" data-space="entrance" data-key="function">
+                <span class="multi-tag" data-value="换鞋区">换鞋区</span>
+                <span class="multi-tag" data-value="挂衣/外套区">挂衣/外套区</span>
+                <span class="multi-tag" data-value="包/钥匙/小物件收纳">包/钥匙/小物件收纳</span>
+                <span class="multi-tag" data-value="雨伞收纳">雨伞收纳</span>
+                <span class="multi-tag" data-value="穿衣镜">穿衣镜</span>
+                <span class="multi-tag" data-value="换季鞋收纳">换季鞋收纳</span>
+                <span class="multi-tag" data-value="快递收纳/拆快递">快递收纳/拆快递</span>
+                <span class="multi-tag" data-value="脏衣服暂存">脏衣服暂存</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">玄关形式</div>
+              <div class="select-row" data-field="entrance_form">
+                <span class="select-placeholder">请选择</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">家庭最大鞋码</div>
+              <div class="select-row" data-field="entrance_shoeSize">
+                <span class="select-placeholder">请选择</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 客厅 -->
+        <div class="space-block">
+          <div class="space-header">
+            <span class="space-icon">📺</span>
+            <span class="space-name">客厅</span>
+          </div>
+          <div class="card">
+            <div class="form-item">
+              <div class="form-label">沙发容纳人数</div>
+              <div class="select-row" data-field="livingRoom_sofaSize">
+                <span class="select-placeholder">请选择</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">沙发偏好类型</div>
+              <div class="select-row" data-field="livingRoom_sofaType">
+                <span class="select-placeholder">请选择</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">收纳需求（可多选）</div>
+              <div class="multi-select-grid" data-space="livingRoom" data-key="storage">
+                <span class="multi-tag" data-value="电视柜收纳">电视柜收纳</span>
+                <span class="multi-tag" data-value="整墙收纳柜">整墙收纳柜</span>
+                <span class="multi-tag" data-value="开放格展示">开放格展示</span>
+                <span class="multi-tag" data-value="书柜/绘本架">书柜/绘本架</span>
+                <span class="multi-tag" data-value="玩具收纳">玩具收纳</span>
+                <span class="multi-tag" data-value="无特殊收纳需求">无特殊收纳需求</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">窗帘类型</div>
+              <div class="select-row" data-field="livingRoom_curtainType">
+                <span class="select-placeholder">请选择</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">遮光需求</div>
+              <div class="select-row" data-field="livingRoom_curtainShade">
+                <span class="select-placeholder">请选择</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">窗户开合方式</div>
+              <div class="select-row" data-field="livingRoom_windowOpen">
+                <span class="select-placeholder">请选择</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 餐厅 -->
+        <div class="space-block">
+          <div class="space-header">
+            <span class="space-icon">🍲</span>
+            <span class="space-name">餐厅</span>
+          </div>
+          <div class="card">
+            <div class="form-item">
+              <div class="form-label">餐桌满足人数</div>
+              <div class="select-row" data-field="diningRoom_tableSize">
+                <span class="select-placeholder">请选择</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">餐厅家具（可多选）</div>
+              <div class="multi-select-grid" data-space="diningRoom" data-key="furniture">
+                <span class="multi-tag" data-value="餐桌">餐桌</span>
+                <span class="multi-tag" data-value="餐椅">餐椅</span>
+                <span class="multi-tag" data-value="餐边柜">餐边柜</span>
+                <span class="multi-tag" data-value="酒柜/展示柜">酒柜/展示柜</span>
+                <span class="multi-tag" data-value="岛台/吧台">岛台/吧台</span>
+                <span class="multi-tag" data-value="卡座">卡座</span>
+                <span class="multi-tag" data-value="备餐柜">备餐柜</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">收纳偏好（可多选）</div>
+              <div class="multi-select-grid" data-space="diningRoom" data-key="storage">
+                <span class="multi-tag" data-value="餐边柜收纳">餐边柜收纳</span>
+                <span class="multi-tag" data-value="酒类/酒杯收纳">酒类/酒杯收纳</span>
+                <span class="multi-tag" data-value="小家电收纳（咖啡机等）">小家电收纳（咖啡机等）</span>
+                <span class="multi-tag" data-value="餐具/餐盘收纳">餐具/餐盘收纳</span>
+                <span class="multi-tag" data-value="无特殊收纳">无特殊收纳</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">餐桌兼容功能（可多选）</div>
+              <div class="multi-select-grid" data-space="diningRoom" data-key="tableExtra">
+                <span class="multi-tag" data-value="可办公/学习">可办公/学习</span>
+                <span class="multi-tag" data-value="可做手工">可做手工</span>
+                <span class="multi-tag" data-value="可玩游戏">可玩游戏</span>
+                <span class="multi-tag" data-value="可喝茶/茶道">可喝茶/茶道</span>
+                <span class="multi-tag" data-value="仅用餐功能">仅用餐功能</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 主卧 -->
+        <div class="space-block">
+          <div class="space-header">
+            <span class="space-icon">🛌</span>
+            <span class="space-name">主卧</span>
+          </div>
+          <div class="card">
+            <div class="form-item">
+              <div class="form-label">家具配置（可多选）</div>
+              <div class="multi-select-grid" data-space="masterBedroom" data-key="furniture">
+                <span class="multi-tag" data-value="1.8m双人床">1.8m双人床</span>
+                <span class="multi-tag" data-value="2.0m大床">2.0m大床</span>
+                <span class="multi-tag" data-value="榻榻米">榻榻米</span>
+                <span class="multi-tag" data-value="床头柜×2">床头柜×2</span>
+                <span class="multi-tag" data-value="梳妆台">梳妆台</span>
+                <span class="multi-tag" data-value="斗柜">斗柜</span>
+                <span class="multi-tag" data-value="电视/投影">电视/投影</span>
+                <span class="multi-tag" data-value="飘窗改造">飘窗改造</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">床的形式</div>
+              <div class="select-row" data-field="masterBedroom_bedForm">
+                <span class="select-placeholder">请选择</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">床头柜形式</div>
+              <div class="select-row" data-field="masterBedroom_nightstand">
+                <span class="select-placeholder">请选择</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">主要使用人员</div>
+              <div class="select-row" data-field="masterBedroom_usage">
+                <span class="select-placeholder">请选择</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">衣柜形式</div>
+              <div class="select-row" data-field="masterBedroom_wardrobe">
+                <span class="select-placeholder">请选择</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 次卧 -->
+        <div class="space-block">
+          <div class="space-header">
+            <span class="space-icon">🛏</span>
+            <span class="space-name">次卧</span>
+          </div>
+          <div class="card">
+            <div class="form-item">
+              <div class="form-label">家具配置（可多选）</div>
+              <div class="multi-select-grid" data-space="secondBedroom" data-key="furniture">
+                <span class="multi-tag" data-value="单人床">单人床</span>
+                <span class="multi-tag" data-value="上下床/子母床">上下床/子母床</span>
+                <span class="multi-tag" data-value="榻榻米">榻榻米</span>
+                <span class="multi-tag" data-value="书桌/电脑桌">书桌/电脑桌</span>
+                <span class="multi-tag" data-value="衣柜">衣柜</span>
+                <span class="multi-tag" data-value="床头柜">床头柜</span>
+                <span class="multi-tag" data-value="飘窗改造">飘窗改造</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">使用场景（可多选）</div>
+              <div class="multi-select-grid" data-space="secondBedroom" data-key="usage">
+                <span class="multi-tag" data-value="老人常住">老人常住</span>
+                <span class="multi-tag" data-value="儿童房">儿童房</span>
+                <span class="multi-tag" data-value="客人偶尔留宿">客人偶尔留宿</span>
+                <span class="multi-tag" data-value="书房/客房两用">书房/客房两用</span>
+                <span class="multi-tag" data-value="储物间">储物间</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 书客房 -->
+        <div class="space-block">
+          <div class="space-header">
+            <span class="space-icon">📚</span>
+            <span class="space-name">书客房</span>
+          </div>
+          <div class="card">
+            <div class="form-item">
+              <div class="form-label">家具配置（可多选）</div>
+              <div class="multi-select-grid" data-space="studyRoom" data-key="furniture">
+                <span class="multi-tag" data-value="书桌">书桌</span>
+                <span class="multi-tag" data-value="书架/书柜">书架/书柜</span>
+                <span class="multi-tag" data-value="电脑/显示器">电脑/显示器</span>
+                <span class="multi-tag" data-value="电竞椅">电竞椅</span>
+                <span class="multi-tag" data-value="打印机位">打印机位</span>
+                <span class="multi-tag" data-value="榻榻米/沙发床（可住人）">榻榻米/沙发床</span>
+                <span class="multi-tag" data-value="绿植区">绿植区</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">书房开放形式</div>
+              <div class="select-row" data-field="studyRoom_openForm">
+                <span class="select-placeholder">请选择</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">书桌同时使用人数</div>
+              <div class="select-row" data-field="studyRoom_deskPeople">
+                <span class="select-placeholder">请选择</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">需收纳书籍数量</div>
+              <div class="select-row" data-field="studyRoom_bookAmount">
+                <span class="select-placeholder">请选择</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 主卫 -->
+        <div class="space-block">
+          <div class="space-header">
+            <span class="space-icon">💧</span>
+            <span class="space-name">主卫</span>
+          </div>
+          <div class="card">
+            <div class="form-item">
+              <div class="form-label">设备配置（可多选）</div>
+              <div class="multi-select-grid" data-space="masterBathroom" data-key="equipment">
+                <span class="multi-tag" data-value="马桶（智能）">马桶（智能）</span>
+                <span class="multi-tag" data-value="马桶（普通）">马桶（普通）</span>
+                <span class="multi-tag" data-value="洗漱台/浴室柜">洗漱台/浴室柜</span>
+                <span class="multi-tag" data-value="淋浴间">淋浴间</span>
+                <span class="multi-tag" data-value="浴缸">浴缸</span>
+                <span class="multi-tag" data-value="壁挂洗衣机">壁挂洗衣机</span>
+                <span class="multi-tag" data-value="小便池（男用）">小便池（男用）</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">淋浴隔断形式</div>
+              <div class="select-row" data-field="masterBathroom_shower">
+                <span class="select-placeholder">请选择</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">浴缸需求</div>
+              <div class="select-row" data-field="masterBathroom_bathtub">
+                <span class="select-placeholder">请选择</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">干湿分离形式</div>
+              <div class="select-row" data-field="masterBathroom_dryWet">
+                <span class="select-placeholder">请选择</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">地漏类型</div>
+              <div class="select-row" data-field="masterBathroom_floorDrain">
+                <span class="select-placeholder">请选择</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 次卫 -->
+        <div class="space-block">
+          <div class="space-header">
+            <span class="space-icon">💦</span>
+            <span class="space-name">次卫</span>
+          </div>
+          <div class="card">
+            <div class="form-item">
+              <div class="form-label">设备配置（可多选）</div>
+              <div class="multi-select-grid" data-space="guestBathroom" data-key="equipment">
+                <span class="multi-tag" data-value="马桶">马桶</span>
+                <span class="multi-tag" data-value="洗漱台/浴室柜">洗漱台/浴室柜</span>
+                <span class="multi-tag" data-value="淋浴间">淋浴间</span>
+                <span class="multi-tag" data-value="浴缸（如有）">浴缸（如有）</span>
+                <span class="multi-tag" data-value="壁挂洗衣机">壁挂洗衣机</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">淋浴隔断形式</div>
+              <div class="select-row" data-field="guestBathroom_shower">
+                <span class="select-placeholder">请选择</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 衣帽间 -->
+        <div class="space-block">
+          <div class="space-header">
+            <span class="space-icon">👗</span>
+            <span class="space-name">衣帽间</span>
+          </div>
+          <div class="card">
+            <div class="form-item">
+              <div class="form-label">基础功能（可多选）</div>
+              <div class="multi-select-grid" data-space="wardrobeRoom" data-key="function">
+                <span class="multi-tag" data-value="短衣悬挂区">短衣悬挂区</span>
+                <span class="multi-tag" data-value="长衣悬挂区">长衣悬挂区</span>
+                <span class="multi-tag" data-value="叠放区（抽屉/隔板）">叠放区（抽屉/隔板）</span>
+                <span class="multi-tag" data-value="行李箱存放">行李箱存放</span>
+                <span class="multi-tag" data-value="包/首饰收纳">包/首饰收纳</span>
+                <span class="multi-tag" data-value="穿衣镜/梳妆区">穿衣镜/梳妆区</span>
+                <span class="multi-tag" data-value="脏衣篓/次净衣区">脏衣篓/次净衣区</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">主要使用者</div>
+              <div class="select-row" data-field="wardrobeRoom_user">
+                <span class="select-placeholder">请选择</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">衣物收纳形式</div>
+              <div class="select-row" data-field="wardrobeRoom_storageForm">
+                <span class="select-placeholder">请选择</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">收纳量要求</div>
+              <div class="select-row" data-field="wardrobeRoom_capacity">
+                <span class="select-placeholder">请选择</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 阳台 -->
+        <div class="space-block">
+          <div class="space-header">
+            <span class="space-icon">☀️</span>
+            <span class="space-name">阳台</span>
+          </div>
+          <div class="card">
+            <div class="form-item">
+              <div class="form-label">基础设备（可多选）</div>
+              <div class="multi-select-grid" data-space="balcony" data-key="baseEquipment">
+                <span class="multi-tag" data-value="洗衣机">洗衣机</span>
+                <span class="multi-tag" data-value="洗衣柜/台盆">洗衣柜/台盆</span>
+                <span class="multi-tag" data-value="晾衣架（电动）">晾衣架（电动）</span>
+                <span class="multi-tag" data-value="晾衣架（手动）">晾衣架（手动）</span>
+                <span class="multi-tag" data-value="燃气热水器">燃气热水器</span>
+                <span class="multi-tag" data-value="拖把池">拖把池</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">扩展功能（可多选）</div>
+              <div class="multi-select-grid" data-space="balcony" data-key="extraFunction">
+                <span class="multi-tag" data-value="健身区">健身区</span>
+                <span class="multi-tag" data-value="花园/绿植">花园/绿植</span>
+                <span class="multi-tag" data-value="休闲茶座">休闲茶座</span>
+                <span class="multi-tag" data-value="宠物活动区">宠物活动区</span>
+                <span class="multi-tag" data-value="小书房/阅读角">小书房/阅读角</span>
+                <span class="multi-tag" data-value="储物柜">储物柜</span>
+              </div>
+            </div>
+            <div class="form-item">
+              <div class="form-label">阳台开放形式</div>
+              <div class="select-row" data-field="balcony_openForm">
+                <span class="select-placeholder">请选择</span>
+                <span class="select-arrow">›</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 其他空间 -->
+        <div class="space-block">
+          <div class="space-header">
+            <span class="space-icon">💡</span>
+            <span class="space-name">其他需求</span>
+          </div>
+          <div class="card">
+            <div class="form-item">
+              <div class="form-label">还有什么空间或需求？</div>
+              <textarea class="form-textarea" id="otherSpaces" placeholder="如：独立储物间、地下室、影音室需求等" data-field="otherSpaces"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab5: 偏好 -->
+      <div class="tab-content" data-content="5">
+        <div class="section-title">设计偏好</div>
+        <div class="card">
+          <div class="form-item">
+            <div class="form-label">灯光形式偏好（可多选）</div>
+            <div class="multi-select-grid" data-space="designPref" data-key="lighting">
+              <span class="multi-tag" data-value="无主灯设计（磁吸轨道灯/筒射灯）">无主灯设计</span>
+              <span class="multi-tag" data-value="主灯+辅助灯">主灯+辅助灯</span>
+              <span class="multi-tag" data-value="全主灯设计">全主灯设计</span>
+              <span class="multi-tag" data-value="灯带（氛围照明）">灯带（氛围照明）</span>
+              <span class="multi-tag" data-value="壁灯/台灯/落地灯">壁灯/台灯/落地灯</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label">灯光色温偏好</div>
+            <div class="select-row" data-field="designPref_colorTemp">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label">客餐厅地面材质</div>
+            <div class="select-row" data-field="designPref_floorLiving">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label">卧室书房地面材质</div>
+            <div class="select-row" data-field="designPref_floorBedroom">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label">家具离地偏好</div>
+            <div class="select-row" data-field="designPref_furnitureHeight">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label">柜体拉手偏好</div>
+            <div class="select-row" data-field="designPref_cabinetForm">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+          <div class="form-item">
+            <div class="form-label">整体风格倾向</div>
+            <div class="select-row" data-field="designPref_style">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title">对新家最期待的描述</div>
+        <div class="card">
+          <div class="form-item">
+            <div class="form-label">写下你对新家最重要的期待、风格需求或生活场景</div>
+            <textarea class="form-textarea" id="designPriority" placeholder="如：需要西厨岛台搭配咖啡角；一定要有独立的游戏房；希望有超大衣帽间..." data-field="designPriority"></textarea>
+          </div>
+        </div>
+
+        <!-- 提交按钮 -->
+        <div class="submit-section">
+          <button class="btn-preview" id="btnGenerate">
+            📄 生成并分享图片
+          </button>
+          <div class="submit-hint">点击后将生成分享图片，可发送给设计师</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 下拉选择弹窗 -->
+  <div class="select-modal" id="selectModal">
+    <div class="select-panel">
+      <div class="select-panel-header">
+        <span class="select-panel-title" id="selectTitle">请选择</span>
+        <span class="select-panel-close" id="selectClose">✕</span>
+      </div>
+      <div class="select-options-list" id="selectOptions"></div>
+      <div class="select-panel-footer">
+        <button class="btn-confirm-select" id="btnConfirmSelect">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 预览弹窗 -->
+  <div class="preview-overlay" id="previewOverlay">
+    <div class="preview-header">
+      <span class="preview-title">生成结果</span>
+      <span class="preview-close" id="previewClose">✕</span>
+    </div>
+    <div class="preview-content" id="previewContent"></div>
+    <div class="preview-footer">
+      <button class="btn-share" id="btnShare">📤 分享</button>
+      <button class="btn-save" id="btnSave">💾 保存图片</button>
+    </div>
+  </div>
+
+  <!-- 加载动画 -->
+  <div class="loading-mask" id="loadingMask">
+    <div class="loading-spinner"></div>
+    <span class="loading-text" id="loadingText">生成中...</span>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- 隐藏的Canvas容器 -->
+  <div class="pdf-canvas-container" id="canvasContainer"></div>
+
+  <script>
+    // ===== 下拉选项配置 =====
+    const SELECT_OPTIONS = {
+      houseStatus: ['毛坯房', '二手房（已装修）', '旧房翻新', '租房改造'],
+      propertyType: ['高层（1-10层）', '高层（11-20层）', '高层（21层以上）', '小高层（7-11层）', '洋房（6层以下）', '别墅', '复式/Loft'],
+      moveInDate: ['1-3个月内', '3-6个月', '6-12个月', '12个月以上', '暂不确定'],
+      measureDate: ['随时可约', '周末方便', '工作日方便', '需提前一周协调'],
+      elderly: ['无老人常住', '1位老人常住', '2位老人常住', '老人偶尔小住'],
+      children: ['无儿童', '0-3岁婴幼儿', '3-6岁幼儿', '6-12岁儿童', '12岁以上青少年'],
+      pet: ['无宠物', '猫', '狗', '猫+狗', '其他宠物'],
+      workMode: ['偶尔在家办公', '每周1-2天', '每周3-4天', '全职居家办公'],
+      totalBudget: ['15万以内', '15-25万', '25-40万', '40-60万', '60-100万', '100万以上'],
+      hardBudget: ['占总预算50%', '占总预算60%', '占总预算70%', '占总预算80%'],
+      quality: ['刚需实用型（1500-2000元/㎡）', '品质舒适型（2000-3500元/㎡）', '中高端（3500-5000元/㎡）', '高端豪宅（5000元+/㎡）'],
+      doorDirection: ['内开', '外开'],
+      sunkenBathroom: ['沉降式卫生间（同层排水）', '非沉降式卫生间（异层排水）', '两者均有', '不确定需物业确认'],
+      balconySealed: ['封闭阳台', '半开放阳台', '开放阳台', '入户花园（可封/不可封待确认）'],
+      bayWindowRemove: ['可拆除（已确认）', '不可拆除（承重结构）', '不确定需物业/图纸确认'],
+      shoeCabinetOutside: ['可以放置', '不可以放置', '不确定需物业确认'],
+      acUnitIndoor: ['可以包进', '不可以包进', '没有空调机位', '不确定需物业确认'],
+      acType: ['中央空调（风管机）', '柜机空调', '挂机空调', '中央空调+风管机组合', '不装空调'],
+      acTypeRoom: ['中央空调', '挂机空调（每间独立）', '不装空调'],
+      waterHeater: ['燃气热水器', '电热水器', '空气能热水器', '太阳能热水器', '燃气+电组合'],
+      floorHeating: ['无地暖需求', '水地暖', '电地暖', '暖气片', '考虑中待定'],
+      smartCurtain: ['全屋智能电动窗帘', '仅客厅/主卧', '暂不考虑'],
+      robotCleaner: ['预留上下水位，强烈安装', '预留电位，后期可能安装', '暂不考虑'],
+      hoodType: ['集成灶', '顶吸式油烟机', '侧吸式油烟机', '中西双油烟机'],
+      waterPurifier: ['无净水需求', '厨下净水器', '全屋净水系统', '管线机（饮水机）'],
+      entrance_form: ['入户门对面整墙收纳', '入户门一侧整排收纳', 'L型转角玄关', '独立鞋柜（无定制）', '无独立玄关（进门即厅）'],
+      entrance_shoeSize: ['35码以下', '35-38码', '39-42码', '43-45码', '45码以上'],
+      livingRoom_sofaSize: ['1-2人', '3-4人', '5人以上', '可折叠沙发床'],
+      livingRoom_sofaType: ['一字型沙发', 'L型转角沙发', '3+1组合沙发', '功能沙发（可躺）', '无固定沙发（灵活布局）'],
+      livingRoom_curtainType: ['电动轨道帘', '手动轨道帘', '罗马帘', '百叶帘', '蜂巢帘', '卷帘'],
+      livingRoom_curtainShade: ['全遮光', '半遮光（透光不透人）', '轻遮光（保留自然光）', '无需遮光'],
+      livingRoom_windowOpen: ['平开窗', '推拉窗', '外开窗', '内开内倒窗', '固定窗（不可开）', '折叠窗'],
+      diningRoom_tableSize: ['2人（日常）', '4人（日常）', '6人（日常）', '8人以上', '可伸缩餐桌（灵活）'],
+      masterBedroom_bedForm: ['常规上床架', '箱体床（床底收纳）', '高架床（下放书桌/收纳）', '地台床（榻榻米式）', '悬浮床（无床脚）'],
+      masterBedroom_nightstand: ['传统床头柜×2', '不对称（1大1小）', '替代方案：斗柜+移动边几', '不要床头柜'],
+      masterBedroom_usage: ['夫妻二人', '单人使用', '夫妻+婴儿/小孩同睡', '老人使用'],
+      masterBedroom_wardrobe: ['步入式衣帽间', '移门衣柜', '开门衣柜', '开放式衣架', '无衣柜（其他空间收纳）'],
+      studyRoom_openForm: ['开放式（与客厅/餐厅打通）', '半开放式（半墙/玻璃隔断）', '独立封闭式书房'],
+      studyRoom_deskPeople: ['1人', '2人', '3人以上', '偶尔使用'],
+      studyRoom_bookAmount: ['100本以下', '100-300本', '300-500本', '500本以上'],
+      masterBathroom_shower: ['淋浴房（整体）', '一字型玻璃隔断', '钻石型淋浴房', '弧形/扇形淋浴房', '半隔断', '无隔断（敞开）'],
+      masterBathroom_bathtub: ['不装浴缸', '嵌入式浴缸', '独立式浴缸', '浴缸+淋浴二合一'],
+      masterBathroom_dryWet: ['完全干湿分离（洗手台独立）', '部分干湿分离', '无干湿分离', '三分离（马桶/淋浴/洗手台各自独立）'],
+      masterBathroom_floorDrain: ['普通地漏', '长条形线性地漏', '墙排地漏', '隐藏式地漏'],
+      guestBathroom_shower: ['一字型玻璃隔断', '钻石型淋浴房', '浴帘', '敞开式', '无淋浴（仅如厕洗手）'],
+      wardrobeRoom_user: ['仅男主人', '仅女主人', '男女主人共用', '全家共用'],
+      wardrobeRoom_storageForm: ['开放式衣架/挂杆', '全柜门封闭', '半开放半封闭', '金属衣柜（砌墙+门）'],
+      wardrobeRoom_capacity: ['日常当季衣物（约1-2季）', '换季衣物全部收纳', '超大收纳量（衣物极多）'],
+      balcony_openForm: ['独立生活阳台（仅晾晒）', '景观阳台（休闲为主）', '半开放阳台', '全开放露台'],
+      designPref_colorTemp: ['全屋3000K暖光', '客厅暖光+卧室暖白光', '全屋4000K自然光', '全屋白光（6000K+）', '可调色温（智能灯光）'],
+      designPref_floorLiving: ['瓷砖（亮面）', '瓷砖（柔光/哑光）', '木地板（实木/实木复合）', '木纹砖', '地砖+地毯分区', '微水泥/水泥自流平'],
+      designPref_floorBedroom: ['木地板（实木/实木复合）', '木纹砖', 'SPC石塑地板', '地毯', '瓷砖'],
+      designPref_furnitureHeight: ['常规高度（落地或10cm以下）', '悬浮/悬空设计（15cm以上）', '高腿家具（扫地机可进）', '无所谓'],
+      designPref_cabinetForm: ['免拉手/隐藏拉手', '明装拉手', '按压式开关', '斜切/45度碰角', '无特别要求'],
+      designPref_style: ['现代简约', '北欧极简', '日式/侘寂', '法式/奶油', '意式轻奢', '美式复古', '中式/新中式', '工业风', '混搭风格']
+    };
+
+    // ===== 全局状态 =====
+    let formData = {};
+    let currentField = null;
+    let selectedValue = null;
+    let generatedImages = [];
+
+    // ===== DOM元素 =====
+    const progressBar = document.getElementById('progressBar');
+    const selectModal = document.getElementById('selectModal');
+    const selectTitle = document.getElementById('selectTitle');
+    const selectOptions = document.getElementById('selectOptions');
+    const previewOverlay = document.getElementById('previewOverlay');
+    const previewContent = document.getElementById('previewContent');
+    const loadingMask = document.getElementById('loadingMask');
+    const loadingText = document.getElementById('loadingText');
+    const toast = document.getElementById('toast');
+
+    // ===== 初始化 =====
+    function init() {
+      // 读取本地存储的数据
+      const saved = localStorage.getItem('decorationFormData');
+      if (saved) {
+        try {
+          formData = JSON.parse(saved);
+          restoreFormData();
+        } catch (e) {
+          console.error('解析保存的数据失败', e);
+        }
+      } else {
+        // 默认选中硬装预算60%
+        formData.hardBudget = '占总预算60%';
+      }
+
+      // 绑定Tab切换
+      document.querySelectorAll('.tab-item').forEach(tab => {
+        tab.addEventListener('click', () => switchTab(parseInt(tab.dataset.tab)));
+      });
+
+      // 绑定下拉选择
+      document.querySelectorAll('.select-row[data-field]').forEach(row => {
+        row.addEventListener('click', () => openSelect(row.dataset.field));
+      });
+
+      // 绑定多选标签
+      document.querySelectorAll('.multi-tag').forEach(tag => {
+        tag.addEventListener('click', () => toggleMulti(tag));
+      });
+
+      // 绑定文本输入
+      document.querySelectorAll('.form-input[data-field], .form-textarea[data-field]').forEach(input => {
+        input.addEventListener('input', (e) => {
+          const field = e.target.dataset.field;
+          formData[field] = e.target.value;
+          saveAndUpdateProgress();
+        });
+      });
+
+      // 绑定弹窗关闭
+      document.getElementById('selectClose').addEventListener('click', closeSelectModal);
+      document.getElementById('btnConfirmSelect').addEventListener('click', confirmSelect);
+      document.getElementById('previewClose').addEventListener('click', closePreview);
+
+      // 绑定生成按钮
+      document.getElementById('btnGenerate').addEventListener('click', generateImage);
+      document.getElementById('btnShare').addEventListener('click', shareImage);
+      document.getElementById('btnSave').addEventListener('click', saveImage);
+
+      // 点击弹窗背景关闭
+      selectModal.addEventListener('click', (e) => {
+        if (e.target === selectModal) closeSelectModal();
+      });
+
+      // 绑定重置按钮
+      document.getElementById('resetBtn').addEventListener('click', showResetConfirm);
+      document.getElementById('confirmCancel').addEventListener('click', hideResetConfirm);
+      document.getElementById('confirmOk').addEventListener('click', doReset);
+      document.getElementById('confirmOverlay').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('confirmOverlay')) hideResetConfirm();
+      });
+
+      updateProgress();
+    }
+
+    // ===== Tab切换 =====
+    function switchTab(id) {
+      document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelector(`.tab-item[data-tab="${id}"]`).classList.add('active');
+      document.querySelector(`.tab-content[data-content="${id}"]`).classList.add('active');
+    }
+
+    // ===== 下拉选择 =====
+    function openSelect(field) {
+      currentField = field;
+      const options = SELECT_OPTIONS[field] || [];
+
+      // 获取当前值
+      if (field.includes('_')) {
+        const [space, key] = field.split('_');
+        selectedValue = formData[space] ? formData[space][key] : null;
+      } else {
+        selectedValue = formData[field] || null;
+      }
+
+      // 设置标题
+      const row = document.querySelector(`[data-field="${field}"]`);
+      selectTitle.textContent = row.closest('.form-item').querySelector('.form-label').textContent.replace(/.*?[：:]/, '').trim() || '请选择';
+
+      // 渲染选项
+      selectOptions.innerHTML = options.map(opt => `
+        <div class="select-option ${selectedValue === opt ? 'selected' : ''}" data-value="${opt}">
+          <span>${opt}</span>
+          ${selectedValue === opt ? '<span class="check-icon">✓</span>' : ''}
+        </div>
+      `).join('');
+
+      // 绑定选项点击
+      selectOptions.querySelectorAll('.select-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+          selectOptions.querySelectorAll('.select-option').forEach(o => o.classList.remove('selected'));
+          opt.classList.add('selected');
+          selectedValue = opt.dataset.value;
+        });
+      });
+
+      selectModal.classList.add('show');
+    }
+
+    function closeSelectModal() {
+      selectModal.classList.remove('show');
+    }
+
+    function confirmSelect() {
+      if (currentField && selectedValue) {
+        if (currentField.includes('_')) {
+          const [space, key] = currentField.split('_');
+          if (!formData[space]) formData[space] = {};
+          formData[space][key] = selectedValue;
+        } else {
+          formData[currentField] = selectedValue;
+        }
+        saveAndUpdateProgress();
+        updateSelectDisplay(currentField, selectedValue);
+      }
+      closeSelectModal();
+    }
+
+    function updateSelectDisplay(field, value) {
+      const row = document.querySelector(`[data-field="${field}"]`);
+      const placeholder = row.querySelector('.select-placeholder');
+      const valueSpan = row.querySelector('.select-value');
+      if (placeholder) placeholder.remove();
+      if (!valueSpan) {
+        row.insertAdjacentHTML('afterbegin', `<span class="select-value">${value}</span>`);
+        row.classList.add('selected');
+      } else {
+        valueSpan.textContent = value;
+      }
+    }
+
+    // ===== 多选标签 =====
+    function toggleMulti(tag) {
+      const grid = tag.closest('.multi-select-grid');
+      const space = grid.dataset.space;
+      const key = grid.dataset.key;
+      const value = tag.dataset.value;
+
+      if (!formData[space]) formData[space] = {};
+      if (!formData[space][key]) formData[space][key] = [];
+
+      const arr = formData[space][key];
+      const idx = arr.indexOf(value);
+      if (idx > -1) {
+        arr.splice(idx, 1);
+        tag.classList.remove('selected');
+      } else {
+        arr.push(value);
+        tag.classList.add('selected');
+      }
+
+      saveAndUpdateProgress();
+    }
+
+    // ===== 数据保存和进度 =====
+    function saveAndUpdateProgress() {
+      localStorage.setItem('decorationFormData', JSON.stringify(formData));
+      updateProgress();
+    }
+
+    function updateProgress() {
+      const required = ['city', 'houseStatus', 'houseArea', 'propertyType', 'moveInDate', 'measureDate', 'residentDesc', 'totalBudget', 'doorDirection', 'sunkenBathroom', 'balconySealed', 'bayWindowRemove'];
+      const spaces = ['entrance', 'livingRoom', 'diningRoom', 'masterBedroom', 'secondBedroom', 'studyRoom', 'masterBathroom', 'guestBathroom', 'wardrobeRoom', 'balcony'];
+
+      let filled = 0;
+      required.forEach(key => {
+        if (formData[key] && String(formData[key]).trim()) filled++;
+      });
+      spaces.forEach(sp => {
+        if (formData[sp] && Object.keys(formData[sp]).length > 0) filled += 0.5;
+      });
+
+      const pct = Math.min(Math.round((filled / (required.length + spaces.length * 0.5)) * 100), 100);
+      progressBar.style.width = pct + '%';
+    }
+
+    function restoreFormData() {
+      // 恢复文本输入
+      ['city', 'houseArea', 'residentDesc', 'otherSpaces', 'designPriority'].forEach(field => {
+        const input = document.getElementById(field) || document.querySelector(`[data-field="${field}"]`);
+        if (input && formData[field]) input.value = formData[field];
+      });
+
+      // 恢复下拉选择显示
+      Object.keys(SELECT_OPTIONS).forEach(field => {
+        let value = null;
+        if (field.includes('_')) {
+          const [space, key] = field.split('_');
+          value = formData[space] ? formData[space][key] : null;
+        } else {
+          value = formData[field] || null;
+        }
+        if (value) updateSelectDisplay(field, value);
+      });
+
+      // 恢复多选标签
+      document.querySelectorAll('.multi-select-grid').forEach(grid => {
+        const space = grid.dataset.space;
+        const key = grid.dataset.key;
+        if (formData[space] && formData[space][key]) {
+          grid.querySelectorAll('.multi-tag').forEach(tag => {
+            if (formData[space][key].includes(tag.dataset.value)) {
+              tag.classList.add('selected');
+            }
+          });
+        }
+      });
+    }
+
+    // ===== 图片生成 =====
+    async function generateImage() {
+      showLoading('正在生成图片...');
+      document.getElementById('btnGenerate').disabled = true;
+
+      try {
+        const pagesData = buildPagesData();
+        const images = [];
+
+        for (let i = 0; i < pagesData.length; i++) {
+          const img = await drawPage(pagesData[i], i + 1, pagesData.length);
+          images.push(img);
+          showLoading(`生成中 ${Math.round((i + 1) / pagesData.length * 100)}%`);
+        }
+
+        generatedImages = images;
+        showPreview(images);
+      } catch (err) {
+        console.error('生成失败', err);
+        showToast('生成失败，请稍后重试');
+      } finally {
+        hideLoading();
+        document.getElementById('btnGenerate').disabled = false;
+      }
+    }
+
+    function buildPagesData() {
+      const col = (key, label, type) => ({ key, label, value: formData[key] || '', type: type || 'select' });
+      const sp = (space, key, label) => {
+        const sv = formData[space];
+        return { key: space + '_' + key, label, value: sv ? sv[key] || '' : '', type: 'select' };
+      };
+      const sm = (space, key, label) => {
+        const sv = formData[space];
+        return { key: space + '_' + key, label, value: sv ? sv[key] || [] : [], type: 'select-multiple' };
+      };
+
+      return [
+        { groups: [{ title: '房屋信息', items: [col('city','所在城市','text'),col('houseStatus','房屋状态'),col('houseArea','房屋面积','text'),col('propertyType','物业类型'),col('moveInDate','计划入住'),col('measureDate','可量房时间')] }] },
+        { groups: [{ title: '居住成员', items: [col('residentDesc','成员概况','text'),col('elderly','老人同住'),col('children','儿童情况'),col('pet','宠物'),col('workMode','居家办公')] }] },
+        { groups: [{ title: '房屋条件确认', items: [col('doorDirection','入户门方向'),col('sunkenBathroom','卫生间类型'),col('balconySealed','阳台封窗'),col('bayWindowRemove','飘窗可拆性'),col('shoeCabinetOutside','走廊鞋柜'),col('acUnitIndoor','空调机位')] }] },
+        { groups: [{ title: '家电设备', items: [col('acType','客厅空调'),col('acTypeRoom','卧室空调'),col('waterHeater','热水器'),col('floorHeating','地暖'),col('smartCurtain','电动窗帘'),col('robotCleaner','扫拖机器人'),col('hoodType','油烟机'),col('waterPurifier','净水设备')] }] },
+        { groups: [
+          { title: '玄关', items: [sm('entrance','function','核心功能'),sm('entrance','form','玄关形式'),sm('entrance','shoeSize','最大鞋码')] },
+          { title: '客厅', items: [sp('livingRoom','sofaSize','沙发人数'),sp('livingRoom','sofaType','沙发类型'),sm('livingRoom','storage','收纳需求'),sp('livingRoom','curtainType','窗帘类型'),sp('livingRoom','curtainShade','遮光需求'),sp('livingRoom','windowOpen','窗户方式')] },
+          { title: '餐厅', items: [sp('diningRoom','tableSize','餐桌人数'),sm('diningRoom','furniture','餐厅家具'),sm('diningRoom','storage','收纳偏好'),sm('diningRoom','tableExtra','餐桌兼容')] },
+          { title: '主卧', items: [sm('masterBedroom','furniture','家具配置'),sp('masterBedroom','bedForm','床形式'),sp('masterBedroom','nightstand','床头柜'),sp('masterBedroom','usage','使用人员'),sp('masterBedroom','wardrobe','衣柜形式')] }
+        ]},
+        { groups: [
+          { title: '次卧', items: [sm('secondBedroom','furniture','家具配置'),sm('secondBedroom','usage','使用场景')] },
+          { title: '书客房', items: [sm('studyRoom','furniture','家具配置'),sp('studyRoom','openForm','开放形式'),sp('studyRoom','deskPeople','书桌人数'),sp('studyRoom','bookAmount','藏书量')] },
+          { title: '主卫', items: [sm('masterBathroom','equipment','设备配置'),sp('masterBathroom','shower','淋浴隔断'),sp('masterBathroom','bathtub','浴缸'),sp('masterBathroom','dryWet','干湿分离'),sp('masterBathroom','floorDrain','地漏')] },
+          { title: '次卫', items: [sm('guestBathroom','equipment','设备配置'),sp('guestBathroom','shower','淋浴隔断')] }
+        ]},
+        { groups: [
+          { title: '衣帽间', items: [sm('wardrobeRoom','function','基础功能'),sp('wardrobeRoom','user','主要使用者'),sp('wardrobeRoom','storageForm','收纳形式'),sp('wardrobeRoom','capacity','收纳量')] },
+          { title: '阳台', items: [sm('balcony','baseEquipment','基础设备'),sm('balcony','extraFunction','扩展功能'),sp('balcony','openForm','阳台形式')] }
+        ]},
+        { groups: [{ title: '设计偏好', items: [sm('designPref','lighting','灯光形式'),sp('designPref','colorTemp','灯光色温'),sp('designPref','floorLiving','客餐厅地面'),sp('designPref','floorBedroom','卧室地面'),sp('designPref','furnitureHeight','家具离地'),sp('designPref','cabinetForm','柜体拉手'),sp('designPref','style','整体风格')] }] },
+        { groups: [{ title: '其他需求', items: [{ label: '补充说明', value: formData.designPriority || '', type: 'text' }] }] }
+      ];
+    }
+
+    async function drawPage(pageData, pageNum, totalPages) {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const dpr = 2; // 高清
+      canvas.width = 375 * dpr;
+      canvas.height = 812 * dpr;
+      ctx.scale(dpr, dpr);
+
+      const w = 375, h = 812;
+      const marginX = 16, marginTop = 30, marginBottom = 30;
+      const contentWidth = w - marginX * 2;
+
+      // 背景
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, w, h);
+
+      // 标题
+      ctx.fillStyle = '#1a1a1a';
+      ctx.font = 'bold 16px -apple-system, sans-serif';
+      ctx.textBaseline = 'top';
+      ctx.fillText('家居需求收集表', marginX, 15);
+
+      ctx.fillStyle = '#999999';
+      ctx.font = '10px -apple-system, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(`${pageNum} / ${totalPages}`, w - marginX, 18);
+      ctx.textAlign = 'left';
+
+      // 分隔线
+      ctx.strokeStyle = '#E5E5E5';
+      ctx.beginPath();
+      ctx.moveTo(marginX, 36);
+      ctx.lineTo(w - marginX, 36);
+      ctx.stroke();
+
+      let y = 46;
+
+      for (const group of pageData.groups) {
+        // 分组标题背景
+        ctx.fillStyle = '#F0F4FF';
+        ctx.fillRect(marginX - 6, y - 4, contentWidth + 12, 20);
+        ctx.fillStyle = '#333333';
+        ctx.font = 'bold 12px -apple-system, sans-serif';
+        ctx.fillText(group.title, marginX, y);
+        y += 26;
+
+        for (const item of group.items) {
+          const itemY = drawFormItem(ctx, item, marginX, y, contentWidth);
+          y = itemY;
+        }
+        y += 6;
+      }
+
+      // 底部页码
+      ctx.fillStyle = '#999999';
+      ctx.font = '10px -apple-system, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${pageNum} / ${totalPages}`, w / 2, h - 20);
+      ctx.textAlign = 'left';
+
+      return canvas.toDataURL('image/png', 1);
+    }
+
+    function drawFormItem(ctx, item, x, y, cw) {
+      let cy = y;
+
+      // 标签
+      ctx.fillStyle = '#666666';
+      ctx.font = '11px -apple-system, sans-serif';
+      ctx.fillText(item.label, x, cy);
+      cy += 14;
+
+      // 值
+      if (item.value !== undefined && item.value !== '' && item.value !== null) {
+        if (item.type === 'select-multiple' || item.type === 'tags') {
+          const tags = Array.isArray(item.value) ? item.value : String(item.value).split('、');
+          let tx = x, ty = cy, tg = 6;
+          const tagH = 18, tagPad = 6, tagFont = 9;
+          ctx.font = tagFont + 'px -apple-system, sans-serif';
+          ctx.textBaseline = 'top';
+
+          for (const tag of tags) {
+            const tw = ctx.measureText(tag).width + tagPad * 2;
+            if (tx + tw > x + cw) { tx = x; ty += tagH + tg; }
+
+            ctx.fillStyle = '#EEF2FF';
+            roundRect(ctx, tx, ty, tw, tagH, 3);
+            ctx.fill();
+            ctx.strokeStyle = '#C5D0FF';
+            ctx.lineWidth = 0.5;
+            roundRect(ctx, tx, ty, tw, tagH, 3);
+            ctx.stroke();
+
+            ctx.fillStyle = '#4F6EFF';
+            ctx.fillText(tag, tx + tagPad, ty + 4);
+            tx += tw + tg;
+          }
+          cy = ty + tagH + 8;
+        } else {
+          ctx.fillStyle = '#1a1a1a';
+          ctx.font = '12px -apple-system, sans-serif';
+          ctx.fillText(String(item.value), x, cy);
+          cy += 16;
+        }
+      } else {
+        ctx.fillStyle = '#CCCCCC';
+        ctx.font = '10px -apple-system, sans-serif';
+        ctx.fillText('未填写', x, cy);
+        cy += 16;
+      }
+
+      // 分隔线
+      ctx.strokeStyle = '#F0F0F0';
+      ctx.beginPath();
+      ctx.moveTo(x, cy);
+      ctx.lineTo(x + cw, cy);
+      ctx.stroke();
+      cy += 8;
+
+      return cy;
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+
+    // ===== 预览和分享 =====
+    function showPreview(images) {
+      previewContent.innerHTML = images.map(img => `<img class="preview-image" src="${img}" alt="预览">`).join('');
+      previewOverlay.classList.add('show');
+    }
+
+    function closePreview() {
+      previewOverlay.classList.remove('show');
+    }
+
+    function shareImage() {
+      if (generatedImages.length === 0) {
+        showToast('请先生成图片');
+        return;
+      }
+
+      // 尝试使用 Web Share API
+      if (navigator.share && navigator.canShare) {
+        // 将图片转为Blob
+        fetch(generatedImages[0])
+          .then(r => r.blob())
+          .then(blob => {
+            const file = new File([blob], '装修需求收集表.png', { type: 'image/png' });
+            if (navigator.canShare({ files: [file] })) {
+              navigator.share({
+                files: [file],
+                title: '装修需求收集表',
+                text: '这是我填写的装修需求，请帮我看看'
+              }).catch(() => {});
+            } else {
+              showToast('您的设备不支持分享图片文件');
+            }
+          });
+      } else {
+        showToast('请长按图片保存后分享');
+      }
+    }
+
+    function saveImage() {
+      if (generatedImages.length === 0) {
+        showToast('请先生成图片');
+        return;
+      }
+
+      // 逐个下载图片
+      generatedImages.forEach((img, i) => {
+        const a = document.createElement('a');
+        a.href = img;
+        a.download = `装修需求收集表_${i + 1}.png`;
+        a.click();
+      });
+
+      showToast('图片已开始下载');
+    }
+
+    // ===== 工具函数 =====
+    function showLoading(text) {
+      loadingText.textContent = text;
+      loadingMask.classList.add('show');
+    }
+
+    function hideLoading() {
+      loadingMask.classList.remove('show');
+    }
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    // ===== 重置功能 =====
+    function showResetConfirm() {
+      document.getElementById('confirmOverlay').classList.add('show');
+    }
+
+    function hideResetConfirm() {
+      document.getElementById('confirmOverlay').classList.remove('show');
+    }
+
+    function doReset() {
+      // 清空本地存储
+      localStorage.removeItem('decorationFormData');
+
+      // 重置全局数据
+      formData = {};
+      generatedImages = [];
+
+      // 重置UI：文本输入
+      document.querySelectorAll('.form-input[data-field], .form-textarea[data-field]').forEach(input => {
+        input.value = '';
+      });
+
+      // 重置UI：下拉选择显示
+      document.querySelectorAll('.select-row[data-field]').forEach(row => {
+        const valueSpan = row.querySelector('.select-value');
+        if (valueSpan) {
+          const placeholder = document.createElement('span');
+          placeholder.className = 'select-placeholder';
+          const field = row.dataset.field;
+          const defaultPlaceholders = {
+            houseStatus: '请选择房屋状态',
+            propertyType: '请选择物业类型',
+            moveInDate: '请选择入住时间',
+            measureDate: '请选择时间',
+            elderly: '请选择',
+            children: '请选择',
+            pet: '请选择',
+            workMode: '请选择',
+            totalBudget: '请选择预算区间',
+            hardBudget: '请选择',
+            quality: '请选择',
+            doorDirection: '请选择',
+            sunkenBathroom: '请选择',
+            balconySealed: '请选择',
+            bayWindowRemove: '请选择',
+            shoeCabinetOutside: '请选择',
+            acUnitIndoor: '请选择',
+            acType: '请选择',
+            acTypeRoom: '请选择',
+            waterHeater: '请选择',
+            floorHeating: '请选择',
+            smartCurtain: '请选择',
+            robotCleaner: '请选择',
+            hoodType: '请选择',
+            waterPurifier: '请选择'
+          };
+          placeholder.textContent = defaultPlaceholders[field] || '请选择';
+          row.classList.remove('selected');
+          valueSpan.remove();
+          row.insertBefore(placeholder, row.querySelector('.select-arrow'));
+        }
+      });
+
+      // 重置UI：多选标签
+      document.querySelectorAll('.multi-tag.selected').forEach(tag => {
+        tag.classList.remove('selected');
+      });
+
+      // 重置Tab到第一页
+      switchTab(1);
+
+      // 关闭确认弹窗
+      hideResetConfirm();
+
+      // 更新进度条
+      updateProgress();
+
+      // 设置默认硬装预算60%
+      formData.hardBudget = '占总预算60%';
+      updateSelectDisplay('hardBudget', '占总预算60%');
+
+      showToast('已重置为空白表单');
+    }
+
+    // 启动
+    init();
+  </script>
+</body>
+</html>
