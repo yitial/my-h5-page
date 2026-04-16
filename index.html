@@ -1736,47 +1736,101 @@
         return { key: space + '_' + key, label, value: sv ? sv[key] || [] : [], type: 'select-multiple' };
       };
 
-      return [
-        { groups: [{ title: '房屋信息', items: [col('city','所在城市','text'),col('houseStatus','房屋状态'),col('houseArea','房屋面积','text'),col('propertyType','物业类型'),col('moveInDate','计划入住'),col('measureDate','可量房时间')] }] },
-        { groups: [{ title: '居住成员', items: [col('residentDesc','成员概况','text'),col('elderly','老人同住'),col('children','儿童情况'),col('pet','宠物'),col('workMode','居家办公')] }] },
-        { groups: [{ title: '房屋条件确认', items: [col('doorDirection','入户门方向'),col('sunkenBathroom','卫生间类型'),col('balconySealed','阳台封窗'),col('bayWindowRemove','飘窗可拆性'),col('shoeCabinetOutside','走廊鞋柜'),col('acUnitIndoor','空调机位')] }] },
-        { groups: [{ title: '家电设备', items: [col('acType','客厅空调'),col('acTypeRoom','卧室空调'),col('waterHeater','热水器'),col('floorHeating','地暖'),col('smartCurtain','电动窗帘'),col('robotCleaner','扫拖机器人'),col('hoodType','油烟机'),col('waterPurifier','净水设备')] }] },
-        { groups: [
-          { title: '玄关', items: [sm('entrance','function','核心功能'),sm('entrance','form','玄关形式'),sm('entrance','shoeSize','最大鞋码')] },
-          { title: '客厅', items: [sp('livingRoom','sofaSize','沙发人数'),sp('livingRoom','sofaType','沙发类型'),sm('livingRoom','storage','收纳需求'),sp('livingRoom','curtainType','窗帘类型'),sp('livingRoom','curtainShade','遮光需求'),sp('livingRoom','windowOpen','窗户方式')] },
-          { title: '餐厅', items: [sp('diningRoom','tableSize','餐桌人数'),sm('diningRoom','furniture','餐厅家具'),sm('diningRoom','storage','收纳偏好'),sm('diningRoom','tableExtra','餐桌兼容')] },
-          { title: '主卧', items: [sm('masterBedroom','furniture','家具配置'),sp('masterBedroom','bedForm','床形式'),sp('masterBedroom','nightstand','床头柜'),sp('masterBedroom','usage','使用人员'),sp('masterBedroom','wardrobe','衣柜形式')] }
-        ]},
-        { groups: [
-          { title: '次卧', items: [sm('secondBedroom','furniture','家具配置'),sm('secondBedroom','usage','使用场景')] },
-          { title: '书客房', items: [sm('studyRoom','furniture','家具配置'),sp('studyRoom','openForm','开放形式'),sp('studyRoom','deskPeople','书桌人数'),sp('studyRoom','bookAmount','藏书量')] },
-          { title: '主卫', items: [sm('masterBathroom','equipment','设备配置'),sp('masterBathroom','shower','淋浴隔断'),sp('masterBathroom','bathtub','浴缸'),sp('masterBathroom','dryWet','干湿分离'),sp('masterBathroom','floorDrain','地漏')] },
-          { title: '次卫', items: [sm('guestBathroom','equipment','设备配置'),sp('guestBathroom','shower','淋浴隔断')] }
-        ]},
-        { groups: [
-          { title: '衣帽间', items: [sm('wardrobeRoom','function','基础功能'),sp('wardrobeRoom','user','主要使用者'),sp('wardrobeRoom','storageForm','收纳形式'),sp('wardrobeRoom','capacity','收纳量')] },
-          { title: '阳台', items: [sm('balcony','baseEquipment','基础设备'),sm('balcony','extraFunction','扩展功能'),sp('balcony','openForm','阳台形式')] }
-        ]},
-        { groups: [{ title: '设计偏好', items: [sm('designPref','lighting','灯光形式'),sp('designPref','colorTemp','灯光色温'),sp('designPref','floorLiving','客餐厅地面'),sp('designPref','floorBedroom','卧室地面'),sp('designPref','furnitureHeight','家具离地'),sp('designPref','cabinetForm','柜体拉手'),sp('designPref','style','整体风格')] }] },
-        { groups: [{ title: '其他需求', items: [{ label: '补充说明', value: formData.designPriority || '', type: 'text' }] }] }
+      // 所有数据项，按Tab分组，每组共用一个大标题居中显示
+      const allGroups = [
+        { title: '🏠 基础信息', tab: '基础', subtitle: '房屋基础信息', items: [col('city','所在城市','text'),col('houseStatus','房屋状态'),col('houseArea','房屋面积','text'),col('propertyType','物业类型'),col('moveInDate','计划入住'),col('measureDate','可量房时间')] },
+        { title: '💰 居住成员', tab: '成员+预算', subtitle: '家庭成员情况', items: [col('residentDesc','成员概况','text'),col('elderly','老人同住'),col('children','儿童情况'),col('pet','宠物'),col('workMode','居家办公')] },
+        { title: '💰 房屋条件确认', tab: '成员+预算', subtitle: '房屋条件确认', items: [col('doorDirection','入户门方向'),col('sunkenBathroom','卫生间类型'),col('balconySealed','阳台封窗'),col('bayWindowRemove','飘窗可拆性'),col('shoeCabinetOutside','走廊鞋柜'),col('acUnitIndoor','空调机位')] },
+        { title: '🎮 家电设备', tab: '设备', subtitle: '家电设备', items: [col('acType','客厅空调'),col('acTypeRoom','卧室空调'),col('waterHeater','热水器'),col('floorHeating','地暖'),col('smartCurtain','电动窗帘'),col('robotCleaner','扫拖机器人'),col('hoodType','油烟机'),col('waterPurifier','净水设备')] },
+        { title: '🚪 玄关', tab: '空间', subtitle: '玄关', items: [sm('entrance','function','核心功能'),sm('entrance','form','玄关形式'),sm('entrance','shoeSize','最大鞋码')] },
+        { title: '🚪 客厅', tab: '空间', subtitle: '客厅', items: [sp('livingRoom','sofaSize','沙发人数'),sp('livingRoom','sofaType','沙发类型'),sm('livingRoom','storage','收纳需求'),sp('livingRoom','curtainType','窗帘类型'),sp('livingRoom','curtainShade','遮光需求'),sp('livingRoom','windowOpen','窗户方式')] },
+        { title: '🚪 餐厅', tab: '空间', subtitle: '餐厅', items: [sp('diningRoom','tableSize','餐桌人数'),sm('diningRoom','furniture','餐厅家具'),sm('diningRoom','storage','收纳偏好'),sm('diningRoom','tableExtra','餐桌兼容')] },
+        { title: '🚪 主卧', tab: '空间', subtitle: '主卧', items: [sm('masterBedroom','furniture','家具配置'),sp('masterBedroom','bedForm','床形式'),sp('masterBedroom','nightstand','床头柜'),sp('masterBedroom','usage','使用人员'),sp('masterBedroom','wardrobe','衣柜形式')] },
+        { title: '🚪 次卧', tab: '空间', subtitle: '次卧', items: [sm('secondBedroom','furniture','家具配置'),sm('secondBedroom','usage','使用场景')] },
+        { title: '🚪 书客房', tab: '空间', subtitle: '书客房', items: [sm('studyRoom','furniture','家具配置'),sp('studyRoom','openForm','开放形式'),sp('studyRoom','deskPeople','书桌人数'),sp('studyRoom','bookAmount','藏书量')] },
+        { title: '🚪 主卫', tab: '空间', subtitle: '主卫', items: [sm('masterBathroom','equipment','设备配置'),sp('masterBathroom','shower','淋浴隔断'),sp('masterBathroom','bathtub','浴缸'),sp('masterBathroom','dryWet','干湿分离'),sp('masterBathroom','floorDrain','地漏')] },
+        { title: '🚪 次卫', tab: '空间', subtitle: '次卫', items: [sm('guestBathroom','equipment','设备配置'),sp('guestBathroom','shower','淋浴隔断')] },
+        { title: '🚪 衣帽间', tab: '空间', subtitle: '衣帽间', items: [sm('wardrobeRoom','function','基础功能'),sp('wardrobeRoom','user','主要使用者'),sp('wardrobeRoom','storageForm','收纳形式'),sp('wardrobeRoom','capacity','收纳量')] },
+        { title: '🚪 阳台', tab: '空间', subtitle: '阳台', items: [sm('balcony','baseEquipment','基础设备'),sm('balcony','extraFunction','扩展功能'),sp('balcony','openForm','阳台形式')] },
+        { title: '✨ 设计偏好', tab: '偏好', subtitle: '设计偏好', items: [sm('designPref','lighting','灯光形式'),sp('designPref','colorTemp','灯光色温'),sp('designPref','floorLiving','客餐厅地面'),sp('designPref','floorBedroom','卧室地面'),sp('designPref','furnitureHeight','家具离地'),sp('designPref','cabinetForm','柜体拉手'),sp('designPref','style','整体风格')] },
+        { title: '✨ 其他需求', tab: '偏好', subtitle: '其他需求', items: [{ label: '补充说明', value: formData.designPriority || '', type: 'text' }] }
       ];
+
+      // 自动分页：每页最多容纳约 720px 高度内容
+      const PAGE_MAX_HEIGHT = 720;
+      const pages = [];
+      let currentPage = { groups: [] };
+      let currentHeight = 0;
+
+      // 测量canvas用于计算高度
+      const mCanvas = document.createElement('canvas');
+      const mCtx = mCanvas.getContext('2d');
+
+      for (const group of allGroups) {
+        // 计算这个分组的高度（标题32px + 小标题24px + 内容 + 6px间距）
+        let groupHeight = 32; // 居中标题高度
+        if (group.subtitle) groupHeight += 24; // 分组小标题
+        for (const item of group.items) {
+          groupHeight += measureItemHeight(mCtx, item, 343);
+        }
+        groupHeight += 6; // 分组间距
+
+        // 如果当前页放不下这个分组，新开一页
+        if (currentHeight > 0 && currentHeight + groupHeight > PAGE_MAX_HEIGHT) {
+          pages.push(currentPage);
+          currentPage = { groups: [] };
+          currentHeight = 0;
+        }
+
+        // 如果单个分组就超过一页，强行放入（至少保证完整显示）
+        currentPage.groups.push(group);
+        currentHeight += groupHeight;
+      }
+
+      // 最后一页
+      if (currentPage.groups.length > 0) {
+        pages.push(currentPage);
+      }
+
+      return pages;
     }
 
     async function drawPage(pageData, pageNum, totalPages) {
+      const w = 375;
+      const marginX = 16, marginTop = 30, marginBottom = 40;
+      const contentWidth = w - marginX * 2;
+
+      // 先测量内容高度
+      const measureCanvas = document.createElement('canvas');
+      const mCtx = measureCanvas.getContext('2d');
+      mCtx.font = 'bold 12px -apple-system, sans-serif';
+
+      let contentHeight = 0;
+      const headerHeight = 36; // 标题+分隔线
+
+      for (const group of pageData.groups) {
+        contentHeight += 32; // 居中标题高度
+        if (group.subtitle) contentHeight += 24; // 分组小标题
+        for (const item of group.items) {
+          contentHeight += measureItemHeight(mCtx, item, contentWidth);
+        }
+        contentHeight += 6; // 分组间距
+      }
+
+      const pageHeight = Math.max(500, marginTop + headerHeight + contentHeight + marginBottom);
+      const footerY = pageHeight - 25;
+
+      // 创建实际canvas
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      const dpr = 2; // 高清
-      canvas.width = 375 * dpr;
-      canvas.height = 812 * dpr;
+      const dpr = 2;
+      canvas.width = w * dpr;
+      canvas.height = pageHeight * dpr;
       ctx.scale(dpr, dpr);
-
-      const w = 375, h = 812;
-      const marginX = 16, marginTop = 30, marginBottom = 30;
-      const contentWidth = w - marginX * 2;
 
       // 背景
       ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, w, h);
+      ctx.fillRect(0, 0, w, pageHeight);
 
       // 标题
       ctx.fillStyle = '#1a1a1a';
@@ -1800,13 +1854,34 @@
       let y = 46;
 
       for (const group of pageData.groups) {
-        // 分组标题背景
-        ctx.fillStyle = '#F0F4FF';
-        ctx.fillRect(marginX - 6, y - 4, contentWidth + 12, 20);
-        ctx.fillStyle = '#333333';
-        ctx.font = 'bold 12px -apple-system, sans-serif';
-        ctx.fillText(group.title, marginX, y);
-        y += 26;
+        // Tab大标题：左右拉伸到与内容区齐平，文字居中
+        ctx.font = 'bold 14px -apple-system, sans-serif';
+        const titleText = group.title;
+
+        // 标题背景（左右拉伸到与内容区齐平）
+        ctx.fillStyle = '#4F6EFF';
+        roundRect(ctx, marginX, y - 3, contentWidth, 24, 6);
+        ctx.fill();
+
+        // 标题文字（居中）
+        ctx.fillStyle = '#FFFFFF';
+        ctx.textBaseline = 'middle';
+        ctx.textAlign = 'center';
+        ctx.fillText(titleText, w / 2, y + 9);
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+
+        y += 32;
+
+        // 分组小标题（如"房屋基础信息"）
+        if (group.subtitle) {
+          ctx.fillStyle = '#4F6EFF';
+          ctx.fillRect(marginX, y, 3, 16);
+          ctx.fillStyle = '#333333';
+          ctx.font = 'bold 13px -apple-system, sans-serif';
+          ctx.fillText(group.subtitle, marginX + 8, y);
+          y += 24;
+        }
 
         for (const item of group.items) {
           const itemY = drawFormItem(ctx, item, marginX, y, contentWidth);
@@ -1819,10 +1894,34 @@
       ctx.fillStyle = '#999999';
       ctx.font = '10px -apple-system, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(`${pageNum} / ${totalPages}`, w / 2, h - 20);
+      ctx.fillText(`${pageNum} / ${totalPages}`, w / 2, footerY);
       ctx.textAlign = 'left';
 
       return canvas.toDataURL('image/png', 1);
+    }
+
+    function measureItemHeight(ctx, item, cw) {
+      let h = 14; // 标签高度
+      h += 14; // 值区域基础高度
+
+      if (item.type === 'select-multiple' || item.type === 'tags') {
+        const tags = Array.isArray(item.value) ? item.value : (String(item.value).split('、'));
+        if (tags.length > 0 && tags[0]) {
+          ctx.font = '9px -apple-system, sans-serif';
+          let tx = 0, ty = 0, rowH = 18, gap = 6;
+          for (const tag of tags) {
+            const tw = ctx.measureText(tag).width + 12;
+            if (tx + tw > cw) { tx = 0; ty += rowH + gap; }
+            tx += tw + gap;
+          }
+          h += ty + rowH + 8;
+        } else {
+          h += 8;
+        }
+      } else {
+        h += 5; // 分隔线间距
+      }
+      return h;
     }
 
     function drawFormItem(ctx, item, x, y, cw) {
@@ -1859,7 +1958,7 @@
             ctx.fillText(tag, tx + tagPad, ty + 4);
             tx += tw + tg;
           }
-          cy = ty + tagH + 8;
+          cy = ty + tagH + 6;
         } else {
           ctx.fillStyle = '#1a1a1a';
           ctx.font = '12px -apple-system, sans-serif';
@@ -1868,18 +1967,18 @@
         }
       } else {
         ctx.fillStyle = '#CCCCCC';
-        ctx.font = '10px -apple-system, sans-serif';
-        ctx.fillText('未填写', x, cy);
-        cy += 16;
+        ctx.font = '11px -apple-system, sans-serif';
+        ctx.fillText('待填', x, cy);
+        cy += 14;
       }
 
-      // 分隔线
+      // 分隔线（紧凑）
       ctx.strokeStyle = '#F0F0F0';
       ctx.beginPath();
       ctx.moveTo(x, cy);
       ctx.lineTo(x + cw, cy);
       ctx.stroke();
-      cy += 8;
+      cy += 4;
 
       return cy;
     }
