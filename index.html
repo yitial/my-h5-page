@@ -773,6 +773,13 @@
               <span class="select-arrow">›</span>
             </div>
           </div>
+          <div class="form-item">
+            <div class="form-label"><span class="label-dot">选填</span>是否移动弱电箱</div>
+            <div class="select-row" data-field="electricBoxMove">
+              <span class="select-placeholder">请选择</span>
+              <span class="select-arrow">›</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1409,7 +1416,7 @@
       moveInDate: ['1-3个月内', '3-6个月', '6-12个月', '12个月以上', '暂不确定'],
       measureDate: ['随时可约', '周末方便', '工作日方便', '需提前一周协调'],
       elderly: ['无老人常住', '1位老人常住', '2位老人常住', '老人偶尔小住'],
-      children: ['无儿童', '0-3岁婴幼儿', '3-6岁幼儿', '6-12岁儿童', '12岁以上青少年'],
+      children: ['无儿童', '一个', '两个', '三个'],
       pet: ['无宠物', '猫', '狗', '猫+狗', '其他宠物'],
       workMode: ['偶尔在家办公', '每周1-2天', '每周3-4天', '全职居家办公'],
       totalBudget: ['15万以内', '15-25万', '25-40万', '40-60万', '60-100万', '100万以上'],
@@ -1421,7 +1428,8 @@
       bayWindowRemove: ['可拆除（已确认）', '不可拆除（承重结构）', '不确定需物业/图纸确认'],
       shoeCabinetOutside: ['可以放置', '不可以放置', '不确定需物业确认'],
       acUnitIndoor: ['可以包进', '不可以包进', '没有空调机位', '不确定需物业确认'],
-      acType: ['中央空调（风管机）', '柜机空调', '挂机空调', '中央空调+风管机组合', '不装空调'],
+      electricBoxMove: ['是', '否'],
+      acType: ['中央空调', '风管机', '挂机空调', '柜机空调'],
       acTypeRoom: ['中央空调', '挂机空调（每间独立）', '不装空调'],
       waterHeater: ['燃气热水器', '电热水器', '空气能热水器', '太阳能热水器', '燃气+电组合'],
       floorHeating: ['无地暖需求', '水地暖', '电地暖', '暖气片', '考虑中待定'],
@@ -1740,7 +1748,7 @@
       const allGroups = [
         { title: '🏠 基础信息', tab: '基础', subtitle: '房屋基础信息', items: [col('city','所在城市','text'),col('houseStatus','房屋状态'),col('houseArea','房屋面积','text'),col('propertyType','物业类型'),col('moveInDate','计划入住'),col('measureDate','可量房时间')] },
         { title: '💰 居住成员', tab: '成员+预算', subtitle: '家庭成员情况', items: [col('residentDesc','成员概况','text'),col('elderly','老人同住'),col('children','儿童情况'),col('pet','宠物'),col('workMode','居家办公')] },
-        { title: '💰 房屋条件确认', tab: '成员+预算', subtitle: '房屋条件确认', items: [col('doorDirection','入户门方向'),col('sunkenBathroom','卫生间类型'),col('balconySealed','阳台封窗'),col('bayWindowRemove','飘窗可拆性'),col('shoeCabinetOutside','走廊鞋柜'),col('acUnitIndoor','空调机位')] },
+        { title: '💰 房屋条件确认', tab: '成员+预算', subtitle: '房屋条件确认', items: [col('doorDirection','入户门方向'),col('sunkenBathroom','卫生间类型'),col('balconySealed','阳台封窗'),col('bayWindowRemove','飘窗可拆性'),col('shoeCabinetOutside','走廊鞋柜'),col('acUnitIndoor','空调机位'),col('electricBoxMove','移动弱电箱')] },
         { title: '🎮 家电设备', tab: '设备', subtitle: '家电设备', items: [col('acType','客厅空调'),col('acTypeRoom','卧室空调'),col('waterHeater','热水器'),col('floorHeating','地暖'),col('smartCurtain','电动窗帘'),col('robotCleaner','扫拖机器人'),col('hoodType','油烟机'),col('waterPurifier','净水设备')] },
         { title: '🚪 玄关', tab: '空间', subtitle: '玄关', items: [sm('entrance','function','核心功能'),sm('entrance','form','玄关形式'),sm('entrance','shoeSize','最大鞋码')] },
         { title: '🚪 客厅', tab: '空间', subtitle: '客厅', items: [sp('livingRoom','sofaSize','沙发人数'),sp('livingRoom','sofaType','沙发类型'),sm('livingRoom','storage','收纳需求'),sp('livingRoom','curtainType','窗帘类型'),sp('livingRoom','curtainShade','遮光需求'),sp('livingRoom','windowOpen','窗户方式')] },
@@ -2115,6 +2123,7 @@
             bayWindowRemove: '请选择',
             shoeCabinetOutside: '请选择',
             acUnitIndoor: '请选择',
+            electricBoxMove: '请选择',
             acType: '请选择',
             acTypeRoom: '请选择',
             waterHeater: '请选择',
